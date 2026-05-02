@@ -8,8 +8,8 @@
 
     <div class="sidebar-section">
       <p class="sidebar-title">Bán hàng</p>
-      <a href="#">Đơn hàng</a>
-      <a href="#">Khách hàng</a>
+      <RouterLink to="/orders">Đơn hàng</RouterLink>
+      <RouterLink to="/customers">Khách hàng</RouterLink>
       <a href="#">Báo cáo</a>
     </div>
   </aside>
