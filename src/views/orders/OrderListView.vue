@@ -184,7 +184,7 @@ function getPaymentStatusColor(status) {
     <div class="section-header page-section-header">
       <div>
         <p class="eyebrow">Bán hàng</p>
-        <h1>Danh sách đơn hàng</h1>
+        <h2>Danh sách đơn hàng</h2>
       </div>
     </div>
 
