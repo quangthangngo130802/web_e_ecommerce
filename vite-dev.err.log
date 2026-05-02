@@ -1,0 +1,6 @@
+▲ [WARNING] Non-relative path "src/*" is not allowed when "baseUrl" is not set (did you forget a leading "./"?) [tsconfig.json]
+
+    jsconfig.json:5:14:
+      5 │       "@/*": ["src/*"]
+        ╵               ~~~~~~~
+
