@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { DeleteOutlined } from '@ant-design/icons-vue'
 
 const customers = ref([
   {
@@ -36,11 +37,10 @@ const customers = ref([
   },
 ])
 
-// const totalCustomers = computed(() => customers.value.length)
-const totalCustomers = ref(customers.value.length)
+const totalCustomers = computed(() => customers.value.length)
 
 
-const customerComments = [
+const customerComments = ref([
   {
     id: 1,
     name: 'Nguyễn Văn An',
@@ -61,7 +61,10 @@ const customerComments = [
     name: 'Phạm Thu Hà',
     content: 'Đổi trả thuận tiện, chất lượng sản phẩm đúng mô tả.',
   },
-]
+])
+
+const customerInputRows = ref([])
+const commentInputRows = ref([])
 
 const genderMap = {
   male: 'Nam',
@@ -158,6 +161,147 @@ const commentColumns = [
   },
 ]
 
+const customerInputColumns = [
+  {
+    title: 'Tên khách hàng',
+    dataIndex: 'name',
+    key: 'name',
+    width: 220,
+  },
+  {
+    title: 'Số điện thoại',
+    dataIndex: 'phone',
+    key: 'phone',
+    width: 170,
+  },
+  {
+    title: 'Ngày sinh',
+    dataIndex: 'birthday',
+    key: 'birthday',
+    width: 150,
+  },
+  {
+    title: 'Giới tính',
+    dataIndex: 'gender',
+    key: 'gender',
+    width: 140,
+  },
+  {
+    title: 'Trạng thái',
+    dataIndex: 'status',
+    key: 'status',
+    width: 160,
+  },
+  {
+    title: '',
+    key: 'action',
+    width: 90,
+    align: 'center',
+  },
+]
+
+const commentInputColumns = [
+  {
+    title: 'Tên khách hàng',
+    dataIndex: 'name',
+    key: 'name',
+    width: 240,
+  },
+  {
+    title: 'Nội dung',
+    dataIndex: 'content',
+    key: 'content',
+  },
+  {
+    title: '',
+    key: 'action',
+    width: 90,
+    align: 'center',
+  },
+]
+
+function createCustomerInputRow() {
+  return {
+    uid: Date.now() + Math.random(),
+    name: '',
+    phone: '',
+    birthday: '',
+    gender: 'male',
+    status: 'active',
+  }
+}
+
+function createCommentInputRow() {
+  return {
+    uid: Date.now() + Math.random(),
+    name: '',
+    content: '',
+  }
+}
+
+function addCustomerInputRow() {
+  customerInputRows.value.push(createCustomerInputRow())
+}
+
+function removeCustomerInputRow(uid) {
+  customerInputRows.value = customerInputRows.value.filter((row) => row.uid !== uid)
+}
+
+function saveCustomerInputRows() {
+  const validRows = customerInputRows.value.filter((row) => row.name.trim())
+
+  if (!validRows.length) return false
+
+  const currentMaxId = Math.max(...customers.value.map((customer) => customer.id), 0)
+
+  customers.value.push(
+    ...validRows.map((row, index) => ({
+      id: currentMaxId + index + 1,
+      name: row.name.trim(),
+      phone: row.phone.trim(),
+      birthday: row.birthday.trim(),
+      gender: row.gender,
+      status: row.status,
+    })),
+  )
+  console.log('Saved customers:', customers.value)
+
+  customerInputRows.value = []
+  return true
+}
+
+function addCommentInputRow() {
+  commentInputRows.value.push(createCommentInputRow())
+}
+
+function removeCommentInputRow(uid) {
+  commentInputRows.value = commentInputRows.value.filter((row) => row.uid !== uid)
+}
+
+function saveCommentInputRows() {
+  const validRows = commentInputRows.value.filter((row) => row.name.trim() && row.content.trim())
+
+  if (!validRows.length) return false
+
+  const currentMaxId = Math.max(...customerComments.value.map((comment) => comment.id), 0)
+
+  customerComments.value.push(
+    ...validRows.map((row, index) => ({
+      id: currentMaxId + index + 1,
+      name: row.name.trim(),
+      content: row.content.trim(),
+    })),
+  )
+
+  commentInputRows.value = []
+  return true
+}
+
+function submitCustomerForm() {
+  saveCustomerInputRows()
+  saveCommentInputRows()
+}
+
 function parseDate(value) {
   const [day, month, year] = value.split('/').map(Number)
 
@@ -195,7 +339,7 @@ function getCustomerStatusColor(status) {
             defaultPageSize: 5,
             pageSizeOptions: ['5', '10', '20', '50'],
             showSizeChanger: true,
-            total: cc,
+            total: totalCustomers,
             showTotal: (total) => `Tổng ${total} khách hàng`,
           }"
           class="data-table"
@@ -249,6 +393,144 @@ function getCustomerStatusColor(status) {
           </template>
         </a-table>
       </a-tab-pane>
+
+       <a-tab-pane key="create" tab="Thêm thông tin khách hàng">
+        <a-tabs default-active-key="customer-info">
+          <a-tab-pane key="customer-info" tab="Thông tin khách hàng">
+            <a-table
+              :columns="customerInputColumns"
+              :data-source="customerInputRows"
+              :pagination="false"
+              class="data-table input-table"
+              row-key="uid"
+              :scroll="{ x: 930 }"
+            >
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'name'">
+                  <a-input v-model:value="record.name" placeholder="Nhập tên khách hàng" />
+                </template>
+
+                <template v-else-if="column.key === 'phone'">
+                  <a-input v-model:value="record.phone" placeholder="Nhập số điện thoại" />
+                </template>
+
+                <template v-else-if="column.key === 'birthday'">
+                  <a-input v-model:value="record.birthday" placeholder="dd/mm/yyyy" />
+                </template>
+
+                <template v-else-if="column.key === 'gender'">
+                  <a-select v-model:value="record.gender" style="width: 100%">
+                    <a-select-option value="male">Nam</a-select-option>
+                    <a-select-option value="female">Nữ</a-select-option>
+                    <a-select-option value="other">Khác</a-select-option>
+                  </a-select>
+                </template>
+
+                <template v-else-if="column.key === 'status'">
+                  <a-select v-model:value="record.status" style="width: 100%">
+                    <a-select-option value="active">Hoạt động</a-select-option>
+                    <a-select-option value="inactive">Tạm ngưng</a-select-option>
+                    <a-select-option value="blocked">Đã khóa</a-select-option>
+                  </a-select>
+                </template>
+
+                <template v-else-if="column.key === 'action'">
+                  <a-button
+                    danger
+                    shape="circle"
+                    title="Xóa"
+                    aria-label="Xóa"
+                    @click="removeCustomerInputRow(record.uid)"
+                  >
+                    <DeleteOutlined />
+                  </a-button>
+                </template>
+              </template>
+            </a-table>
+
+            <div class="table-actions">
+              <a-button @click="addCustomerInputRow">Thêm hàng</a-button>
+            </div>
+          </a-tab-pane>
+
+          <a-tab-pane key="comment-info" tab="Nội dung">
+            <a-table
+              :columns="commentInputColumns"
+              :data-source="commentInputRows"
+              :pagination="false"
+              class="data-table input-table"
+              row-key="uid"
+              :scroll="{ x: 720 }"
+            >
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'name'">
+                  <a-input v-model:value="record.name" placeholder="Nhập tên khách hàng" />
+                </template>
+
+                <template v-else-if="column.key === 'content'">
+                  <a-textarea
+                    v-model:value="record.content"
+                    placeholder="Nhập nội dung"
+                    :auto-size="{ minRows: 1, maxRows: 4 }"
+                  />
+                </template>
+
+                <template v-else-if="column.key === 'action'">
+                  <a-button
+                    danger
+                    shape="circle"
+                    title="Xóa"
+                    aria-label="Xóa"
+                    @click="removeCommentInputRow(record.uid)"
+                  >
+                    <DeleteOutlined />
+                  </a-button>
+                </template>
+              </template>
+            </a-table>
+
+            <div class="table-actions">
+              <a-button @click="addCommentInputRow">Thêm hàng</a-button>
+            </div>
+         
+          </a-tab-pane>
+        </a-tabs>
+
+        <div class="form-submit-actions">
+          <a-button type="primary" @click="submitCustomerForm">Lưu thông tin khách hàng</a-button>
+        </div>
+      </a-tab-pane>
+
     </a-tabs>
   </section>
 </template>
+
+<style scoped>
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.form-submit-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+:deep(.input-table .ant-empty) {
+  margin-block: 18px;
+  font-size: 0.85rem;
+}
+
+:deep(.input-table .ant-empty-image) {
+  height:24px;
+  margin-bottom: 4px;
+}
+
+:deep(.input-table .ant-empty-image svg) {
+  width: 42px;
+  height: 34px;
+}
+</style>
