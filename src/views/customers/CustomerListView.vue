@@ -65,6 +65,8 @@ const customerComments = ref([
 
 const customerInputRows = ref([])
 const commentInputRows = ref([])
+const selectedCustomerRowKeys = ref([])
+const selectedCommentRowKeys = ref([])
 
 const genderMap = {
   male: 'Nam',
@@ -254,17 +256,17 @@ function saveCustomerInputRows() {
 
   const currentMaxId = Math.max(...customers.value.map((customer) => customer.id), 0)
 
-  customers.value.push(
-    ...validRows.map((row, index) => ({
-      id: currentMaxId + index + 1,
-      name: row.name.trim(),
-      phone: row.phone.trim(),
-      birthday: row.birthday.trim(),
-      gender: row.gender,
-      status: row.status,
-    })),
-  )
-  console.log('Saved customers:', customers.value)
+  const newCustomers = validRows.map((row, index) => ({
+    id: currentMaxId + index + 1,
+    name: row.name.trim(),
+    phone: row.phone.trim(),
+    birthday: row.birthday.trim(),
+    gender: row.gender,
+    status: row.status,
+  }))
+
+  customers.value.push(...newCustomers)
+  console.log('Saved customers:', newCustomers)
 
   customerInputRows.value = []
   return true
@@ -285,13 +287,14 @@ function saveCommentInputRows() {
 
   const currentMaxId = Math.max(...customerComments.value.map((comment) => comment.id), 0)
 
-  customerComments.value.push(
-    ...validRows.map((row, index) => ({
+  const newcustomerComments = validRows.map((row, index) => ({
       id: currentMaxId + index + 1,
       name: row.name.trim(),
       content: row.content.trim(),
-    })),
-  )
+    }));
+
+  customerComments.value.push(...newcustomerComments)
+  console.log('Saved comments:', newcustomerComments)
 
   commentInputRows.value = []
   return true
@@ -300,6 +303,14 @@ function saveCommentInputRows() {
 function submitCustomerForm() {
   saveCustomerInputRows()
   saveCommentInputRows()
+}
+
+function handleCustomerSelectionChange(selectedRowKeys) {
+  selectedCustomerRowKeys.value = selectedRowKeys
+}
+
+function handleCommentSelectionChange(selectedRowKeys) {
+  selectedCommentRowKeys.value = selectedRowKeys
 }
 
 function parseDate(value) {
@@ -344,6 +355,10 @@ function getCustomerStatusColor(status) {
           }"
           class="data-table"
           row-key="id"
+          :row-selection="{
+            selectedRowKeys: selectedCustomerRowKeys,
+            onChange: handleCustomerSelectionChange,
+          }"
           :scroll="{ x: 900 }"
         >
           <template #bodyCell="{ column, record, index }">
@@ -380,6 +395,10 @@ function getCustomerStatusColor(status) {
           }"
           class="data-table"
           row-key="id"
+          :row-selection="{
+            selectedRowKeys: selectedCommentRowKeys,
+            onChange: handleCommentSelectionChange,
+          }"
           :scroll="{ x: 720 }"
         >
           <template #bodyCell="{ column, record, index }">
