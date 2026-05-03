@@ -1,5 +1,7 @@
 <script setup>
-const customers = [
+import { computed, ref } from 'vue'
+
+const customers = ref([
   {
     id: 1,
     name: 'Nguyễn Văn An',
@@ -32,7 +34,11 @@ const customers = [
     gender: 'female',
     status: 'blocked',
   },
-]
+])
+
+// const totalCustomers = computed(() => customers.value.length)
+const totalCustomers = ref(customers.value.length)
+
 
 const customerComments = [
   {
@@ -176,7 +182,7 @@ function getCustomerStatusColor(status) {
     <div class="section-header page-section-header">
       <div>
         <p class="eyebrow">Khách hàng</p>
-        <h1>Danh sách khách hàng</h1>
+        <h2>Danh sách khách hàng</h2>
       </div>
     </div>
 
@@ -189,6 +195,7 @@ function getCustomerStatusColor(status) {
             defaultPageSize: 5,
             pageSizeOptions: ['5', '10', '20', '50'],
             showSizeChanger: true,
+            total: cc,
             showTotal: (total) => `Tổng ${total} khách hàng`,
           }"
           class="data-table"
