@@ -1,46 +1,24 @@
 <script setup>
-const orders = [
-  {
-    id: 1,
-    code: 'DH-20260502-001',
-    customerName: 'Nguyễn Văn An',
-    quantity: 3,
-    total: 1250000,
-    status: 'processing',
-    paymentStatus: 'paid',
-    purchasedAt: '02/05/2026',
-  },
-  {
-    id: 2,
-    code: 'DH-20260502-002',
-    customerName: 'Trần Thị Bình',
-    quantity: 1,
-    total: 459000,
-    status: 'shipping',
-    paymentStatus: 'unpaid',
-    purchasedAt: '02/05/2026',
-  },
-  {
-    id: 3,
-    code: 'DH-20260501-003',
-    customerName: 'Lê Minh Quân',
-    quantity: 5,
-    total: 2845000,
-    status: 'completed',
-    paymentStatus: 'paid',
-    purchasedAt: '01/05/2026',
-  },
-  {
-    id: 4,
-    code: 'DH-20260430-004',
-    customerName: 'Phạm Thu Hà',
-    quantity: 2,
-    total: 899000,
-    status: 'cancelled',
-    paymentStatus: 'unpaid',
-    purchasedAt: '30/04/2026',
-  },
-]
+import { ref, onMounted } from 'vue'
+import { getOrders } from '@/services/orderService'
+const orders = ref([])
+const loading = ref(false)
+
+const fetchOrders = async () => {
+  loading.value = true
+  try {
+    const data = await getOrders()
+    orders.value = data;
+    console.log(data);
+    console.log(orders.value);
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchOrders)
 
 const orderStatusMap = {
   processing: {
